@@ -1,4 +1,4 @@
-const BASE = "";  // Uses CRA proxy → http://localhost:5000
+const BASE = (process.env.REACT_APP_API_URL || "").replace(/\/$/, "");
 
 export async function generateLeads({ category, location, count = 30 }) {
   const res = await fetch(`${BASE}/api/generate-leads`, {

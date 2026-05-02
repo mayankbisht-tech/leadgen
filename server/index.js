@@ -19,6 +19,23 @@ const APIFY_DATASET_URL = process.env.APIFY_DATASET_URL || "";
 const APIFY_MAX_ITEMS = parseInt(process.env.APIFY_MAX_ITEMS || "1000", 10);
 const FETCH_TIMEOUT_MS = parseInt(process.env.FETCH_TIMEOUT_MS || "12000", 10);
 
+function getCorsOrigins() {
+  const raw = process.env.CORS_ORIGIN || process.env.CLIENT_ORIGIN || "";
+  if (raw.trim()) {
+    const origins = raw
+      .split(",")
+      .map((origin) => origin.trim())
+      .filter(Boolean);
+    return origins.length > 0 ? origins : false;
+  }
+
+  if (process.env.NODE_ENV === "production") {
+    return false;
+  }
+
+  return ["http://localhost:3000", "http://127.0.0.1:3000"];
+}
+
 // Groq client helpers
 async function callGroqChat({ messages, maxTokens, temperature = 0.2 }) {
   if (!GROQ_API_KEY) {
@@ -399,10 +416,7 @@ async function fetchRealBusinesses(category, location, count) {
 app.use(express.json());
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? false
-        : ["http://localhost:3000", "http://127.0.0.1:3000"],
+    origin: getCorsOrigins(),
     credentials: true,
   })
 );
